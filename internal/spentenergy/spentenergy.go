@@ -1,6 +1,7 @@
 package spentenergy
 
 import (
+	"errors"
 	"time"
 )
 
@@ -12,18 +13,56 @@ const (
 	walkingCaloriesCoefficient = 0.5  // коэффициент для расчета калорий при ходьбе.
 )
 
-func WalkingSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
-	// TODO: реализовать функцию
-}
-
-func RunningSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
-	// TODO: реализовать функцию
+func Distance(steps int, height float64) float64 {
+	stepLength := height * stepLengthCoefficient
+	distance := float64(steps) * stepLength / mInKm
+	return distance
 }
 
 func MeanSpeed(steps int, height float64, duration time.Duration) float64 {
-	// TODO: реализовать функцию
+	if duration <= 0 {
+		return 0
+	}
+	distance := Distance(steps, height)
+	return distance / duration.Hours()
 }
 
-func Distance(steps int, height float64) float64 {
-	// TODO: реализовать функцию
+func RunningSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
+	if steps <= 0 {
+		return 0, errors.New("количество шагов должно быть больше 0")
+	}
+	if weight <= 0 {
+		return 0, errors.New("вес должен быть больше 0")
+	}
+	if height <= 0 {
+		return 0, errors.New("рост должен быть больше 0")
+	}
+	if duration <= 0 {
+		return 0, errors.New("продолжительность должна быть больше 0")
+	}
+
+	meanSpeed := MeanSpeed(steps, height, duration)
+	durationInMinutes := duration.Minutes()
+	calories := weight * meanSpeed * durationInMinutes / minInH
+	return calories, nil
+}
+
+func WalkingSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
+	if steps <= 0 {
+		return 0, errors.New("количество шагов должно быть больше 0")
+	}
+	if weight <= 0 {
+		return 0, errors.New("вес должен быть больше 0")
+	}
+	if height <= 0 {
+		return 0, errors.New("рост должен быть больше 0")
+	}
+	if duration <= 0 {
+		return 0, errors.New("продолжительность должна быть больше 0")
+	}
+
+	meanSpeed := MeanSpeed(steps, height, duration)
+	durationInMinutes := duration.Minutes()
+	calories := weight * meanSpeed * durationInMinutes / minInH * walkingCaloriesCoefficient
+	return calories, nil
 }
